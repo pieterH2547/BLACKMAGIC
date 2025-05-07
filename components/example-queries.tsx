@@ -17,22 +17,15 @@ export function ExampleQueries({ platform, onSelectExample, currentQuery = "" }:
   const [isSaving, setIsSaving] = useState(false)
   const { savedSearches, addSavedSearch, deleteSavedSearch, updateSavedSearch, getCategories } = useSavedSearches()
 
-  // Update the examples to focus on LinkedIn profile searches
+  // Predefined examples
   const examples = [
     {
-      title: "Software Developers",
-      description:
-        'site:linkedin.com/in ("software engineer" OR "software developer") AND (java OR python OR javascript) AND nederland -recruiter -"talent acquisition"',
+      title: "Senior Developer",
+      description: "Senior Java developer met Spring Boot en cloud ervaring",
     },
     {
-      title: "Finance Professionals",
-      description:
-        'site:linkedin.com/in ("financial controller" OR "finance manager" OR accountant OR "financial analyst") AND (excel OR "financial reporting") AND nederland -recruiter -"talent acquisition"',
-    },
-    {
-      title: "Marketing Specialisten",
-      description:
-        'site:linkedin.com/in ("marketing manager" OR "digital marketer" OR "marketing specialist") AND ("social media" OR seo OR "content marketing") AND nederland -recruiter -"talent acquisition"',
+      title: "UX/UI Designer",
+      description: "UX/UI designer met Figma ervaring en e-commerce achtergrond",
     },
   ]
 

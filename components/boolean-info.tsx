@@ -123,9 +123,8 @@ export function BooleanInfo() {
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>
                 <span>
-                  Begin <strong>altijd</strong> met{" "}
-                  <code className="bg-black/30 px-1 py-0.5 rounded">site:linkedin.com/in</code> om alleen profielen te
-                  vinden
+                  Begin altijd met <code className="bg-black/30 px-1 py-0.5 rounded">site:linkedin.com/in</code> om
+                  alleen profielen te vinden
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -139,23 +138,7 @@ export function BooleanInfo() {
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>
                 <span>
                   Sluit recruiters uit met{" "}
-                  <code className="bg-black/30 px-1 py-0.5 rounded">
-                    -recruiter -"talent acquisition" -HR -recruitment
-                  </code>
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>
-                <span>
-                  Gebruik aanhalingstekens voor exacte woordgroepen zoals{" "}
-                  <code className="bg-black/30 px-1 py-0.5 rounded">"5+ years experience"</code>
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>
-                <span>
-                  Combineer vaardigheden met OR:{" "}
-                  <code className="bg-black/30 px-1 py-0.5 rounded">(java OR python OR javascript)</code>
+                  <code className="bg-black/30 px-1 py-0.5 rounded">-recruiter -"talent acquisition" -HR</code>
                 </span>
               </li>
             </ul>

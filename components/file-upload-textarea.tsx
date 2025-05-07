@@ -7,6 +7,7 @@ import { Paperclip, FileText, Loader2, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { fetchJobDescription } from "@/app/actions"
 
 interface FileUploadTextareaProps {
   value: string
@@ -87,35 +88,23 @@ export function FileUploadTextarea({
   const fetchJobFromUrl = async (url: string) => {
     setIsLoading(true)
     try {
-      const result = await fetch("/api/proxy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      })
+      const result = await fetchJobDescription(url)
 
-      if (!result.ok) {
-        throw new Error(`HTTP error! status: ${result.status}`)
-      }
-
-      const data = await result.json()
-
-      if (data.text) {
-        onChange(data.text)
+      if (typeof result === "string") {
+        onChange(result)
         const urlSource = `URL: ${new URL(url).hostname}`
         setFileName(urlSource)
         setLastProcessedUrl(url)
 
         if (onUploadSuccess) {
-          onUploadSuccess(data.text, urlSource)
+          onUploadSuccess(result, urlSource)
         }
 
-        if (data.text.includes("OPMERKING:") || data.text.includes("We konden de vacature niet ophalen")) {
+        if (result.includes("OPMERKING:") || result.includes("We konden de vacature niet ophalen")) {
           setShowDirectInputTip(true)
         }
       } else {
-        alert(`Fout bij het ophalen van de URL: ${data.error || "Onbekende fout"}`)
+        alert(`Fout bij het ophalen van de URL: ${result.message}`)
         setShowDirectInputTip(true)
       }
     } catch (error) {

@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Wand2, Linkedin, Search, Sparkles } from "lucide-react"
+import { Copy, Wand2, Linkedin, Search, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ExampleQueries } from "@/components/example-queries"
 import { BooleanInfo } from "@/components/boolean-info"
 import { FileUploadTextarea } from "@/components/file-upload-textarea"
-import { EditableQuery } from "@/components/editable-query"
 import GenerateBooleanAction, { type Platform } from "@/app/actions"
 import { getSearchUrl } from "@/lib/search-urls"
 
@@ -63,10 +62,6 @@ export default function Home() {
     }
   }
 
-  const handleQueryChange = (newQuery: string) => {
-    setBooleanQuery(newQuery)
-  }
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(booleanQuery)
     setCopied(true)
@@ -97,14 +92,9 @@ export default function Home() {
         className={`container mx-auto px-4 py-8 max-w-4xl transition-opacity duration-500 ${isVisible ? "opacity-100" : "opacity-0"}`}
       >
         <header className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center shadow-lg">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
-              Filips zoekmachine
-            </h1>
-          </div>
+          <h1 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
+            Blackmagic.AI Sourcing
+          </h1>
           <p className="text-purple-200/90 max-w-2xl mx-auto">
             Transformeer natuurlijke taal in krachtige Boolean zoekopdrachten
           </p>
@@ -115,7 +105,7 @@ export default function Home() {
             <Card className="bg-black/40 border border-purple-800/20 p-5 h-full">
               <h2 className="text-lg font-medium mb-4 text-purple-300 flex items-center gap-2">
                 <Linkedin className="h-5 w-5" />
-                LinkedIn Profiel Zoeken
+                LinkedIn X-ray
               </h2>
               <ExampleQueries platform={platform} onSelectExample={handleSelectExample} currentQuery={booleanQuery} />
             </Card>
@@ -137,7 +127,7 @@ export default function Home() {
                     value={userInput}
                     onChange={setUserInput}
                     onUploadSuccess={handleUploadSuccess}
-                    placeholder="Beschrijf je ideale kandidaat voor een gerichte LinkedIn profiel zoekopdracht"
+                    placeholder="Beschrijf je ideale kandidaat of upload een vacature of geef de link naar een vacature"
                     className="min-h-[150px] bg-black/40 border-purple-800/20 text-white placeholder:text-purple-400/70"
                   />
                 </div>
@@ -155,7 +145,7 @@ export default function Home() {
                   ) : (
                     <span className="flex items-center gap-2">
                       <Wand2 className="h-4 w-4" />
-                      <span>Genereer LinkedIn Profiel Zoekopdracht</span>
+                      <span>Genereer Boolean-zoekopdracht</span>
                     </span>
                   )}
                 </Button>
@@ -169,6 +159,26 @@ export default function Home() {
                     <Search className="h-5 w-5" />
                     Resultaat
                   </h2>
+                  {booleanQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={copyToClipboard}
+                      className="text-purple-300 hover:text-white"
+                    >
+                      {copied ? (
+                        <span className="flex items-center text-green-400">
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Gekopieerd
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <Copy className="h-4 w-4 mr-2" />
+                          Kopiëren
+                        </span>
+                      )}
+                    </Button>
+                  )}
                 </div>
 
                 {isError ? (
@@ -178,8 +188,11 @@ export default function Home() {
                   </div>
                 ) : (
                   <>
-                    {/* Geef de platform parameter door aan de EditableQuery component */}
-                    <EditableQuery query={booleanQuery} onQueryChange={handleQueryChange} platform={platform} />
+                    <div className="relative">
+                      <pre className="bg-black/40 p-4 rounded-md text-green-400 whitespace-pre-wrap overflow-x-auto border border-purple-800/20 text-sm">
+                        {booleanQuery}
+                      </pre>
+                    </div>
 
                     {explanation && (
                       <div className="mt-4 text-sm text-purple-300 bg-black/20 p-4 rounded-md border border-purple-800/20">
@@ -213,28 +226,25 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-purple-800/20">
-          {/* Footer */}
-          <div className="mt-6 pt-6 border-t border-purple-800/20">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-sm text-purple-300/70">
-                <p>&copy; {currentYear} Filips zoekmachine. Alle rechten voorbehouden.</p>
-              </div>
-              <div className="text-xs text-purple-300/50">
-                <p>
-                  Ontwikkeld door Filip |{" "}
-                  <a href="#" className="hover:text-purple-300 underline">
-                    Gebruiksvoorwaarden
-                  </a>{" "}
-                  |{" "}
-                  <a href="#" className="hover:text-purple-300 underline">
-                    Privacybeleid
-                  </a>
-                </p>
-              </div>
+        <footer className="mt-12 pt-6 border-t border-purple-800/20">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-purple-300/70">
+              <p>&copy; {currentYear} Blackmagic.AI. Alle rechten voorbehouden.</p>
+            </div>
+            <div className="text-xs text-purple-300/50">
+              <p>
+                Ontwikkeld door Blackmagic.AI |{" "}
+                <a href="#" className="hover:text-purple-300 underline">
+                  Gebruiksvoorwaarden
+                </a>{" "}
+                |{" "}
+                <a href="#" className="hover:text-purple-300 underline">
+                  Privacybeleid
+                </a>
+              </p>
             </div>
           </div>
-        </div>
+        </footer>
       </div>
 
       <BooleanInfo />
