@@ -8,8 +8,8 @@ export function getSearchUrl(platform: string, query: string) {
         url: `https://www.google.com/search?q=${encodedQuery}`,
       },
       {
-        name: "LinkedIn Recruiter",
-        url: `https://www.linkedin.com/talent/search?searchContextId=YOUR_CONTEXT_ID&searchHistoryId=YOUR_HISTORY_ID&searchRequestId=YOUR_REQUEST_ID&query=${encodedQuery}`,
+        name: "LinkedIn Search",
+        url: `https://www.linkedin.com/search/results/people/?keywords=${encodedQuery}`,
       },
     ]
   }
