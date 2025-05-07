@@ -17,15 +17,22 @@ export function ExampleQueries({ platform, onSelectExample, currentQuery = "" }:
   const [isSaving, setIsSaving] = useState(false)
   const { savedSearches, addSavedSearch, deleteSavedSearch, updateSavedSearch, getCategories } = useSavedSearches()
 
-  // Nieuwe voorbeelden: alleen boekhouders en Finance
+  // Update the examples to focus on LinkedIn profile searches
   const examples = [
     {
-      title: "Boekhouders",
-      description: "Boekhoudkundige professionals met ervaring in financiële administratie",
+      title: "Software Developers",
+      description:
+        'site:linkedin.com/in ("software engineer" OR "software developer") AND (java OR python OR javascript) AND nederland -recruiter -"talent acquisition"',
     },
     {
-      title: "Finance",
-      description: "Finance professionals met expertise in financial planning en controlling",
+      title: "Finance Professionals",
+      description:
+        'site:linkedin.com/in ("financial controller" OR "finance manager" OR accountant OR "financial analyst") AND (excel OR "financial reporting") AND nederland -recruiter -"talent acquisition"',
+    },
+    {
+      title: "Marketing Specialisten",
+      description:
+        'site:linkedin.com/in ("marketing manager" OR "digital marketer" OR "marketing specialist") AND ("social media" OR seo OR "content marketing") AND nederland -recruiter -"talent acquisition"',
     },
   ]
 

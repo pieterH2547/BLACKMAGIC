@@ -115,7 +115,7 @@ export default function Home() {
             <Card className="bg-black/40 border border-purple-800/20 p-5 h-full">
               <h2 className="text-lg font-medium mb-4 text-purple-300 flex items-center gap-2">
                 <Linkedin className="h-5 w-5" />
-                LinkedIn X-ray
+                LinkedIn Profiel Zoeken
               </h2>
               <ExampleQueries platform={platform} onSelectExample={handleSelectExample} currentQuery={booleanQuery} />
             </Card>
@@ -137,7 +137,7 @@ export default function Home() {
                     value={userInput}
                     onChange={setUserInput}
                     onUploadSuccess={handleUploadSuccess}
-                    placeholder="Beschrijf je ideale kandidaat of upload een vacature of geef de link naar een vacature"
+                    placeholder="Beschrijf je ideale kandidaat voor een gerichte LinkedIn profiel zoekopdracht"
                     className="min-h-[150px] bg-black/40 border-purple-800/20 text-white placeholder:text-purple-400/70"
                   />
                 </div>
@@ -155,7 +155,7 @@ export default function Home() {
                   ) : (
                     <span className="flex items-center gap-2">
                       <Wand2 className="h-4 w-4" />
-                      <span>Genereer Boolean-zoekopdracht</span>
+                      <span>Genereer LinkedIn Profiel Zoekopdracht</span>
                     </span>
                   )}
                 </Button>

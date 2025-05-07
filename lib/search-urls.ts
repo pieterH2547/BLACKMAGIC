@@ -4,12 +4,12 @@ export function getSearchUrl(platform: string, query: string) {
   if (platform === "linkedin") {
     return [
       {
-        name: "Google X-ray",
+        name: "Google X-ray Search",
         url: `https://www.google.com/search?q=${encodedQuery}`,
       },
       {
-        name: "LinkedIn Search",
-        url: `https://www.linkedin.com/search/results/people/?keywords=${encodedQuery}`,
+        name: "LinkedIn Recruiter (indien beschikbaar)",
+        url: `https://www.linkedin.com/talent/search?keywords=${encodedQuery.replace(/site:linkedin\.com\/in\s*/i, "")}`,
       },
     ]
   }
@@ -17,7 +17,7 @@ export function getSearchUrl(platform: string, query: string) {
   // Fallback naar Google
   return [
     {
-      name: "Google X-ray",
+      name: "Google X-ray Search",
       url: `https://www.google.com/search?q=${encodedQuery}`,
     },
   ]
