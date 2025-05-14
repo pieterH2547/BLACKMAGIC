@@ -10,11 +10,13 @@ const PLATFORMS = {
 } as const
 
 export type Platform = keyof typeof PLATFORMS
+export type SearchMode = "native" | "xray"
 
 // Voeg deze nieuwe constanten toe aan het begin van het bestand, na de bestaande constanten
 const MAX_GOOGLE_QUERY_WORDS = 32
 const PLATFORM_LIMITATIONS = {
-  [PLATFORMS.LINKEDIN]: `
+  [PLATFORMS.LINKEDIN]: {
+    xray: `
 BELANGRIJKE GOOGLE BEPERKINGEN:
 - Google heeft een limiet van ${MAX_GOOGLE_QUERY_WORDS} woorden per zoekopdracht. Langere queries worden afgekapt.
 - Overmatig gebruik van haakjes en aanhalingstekens kan leiden tot onvoorspelbare resultaten.
@@ -28,6 +30,26 @@ RICHTLIJNEN VOOR EFFECTIEVE QUERIES:
 5. Gebruik - in plaats van NOT voor uitsluitingen
 6. Prioriteer de belangrijkste zoektermen
 `,
+    native: `
+BELANGRIJKE LINKEDIN BEPERKINGEN:
+- LinkedIn ondersteunt een beperktere set Boolean operatoren dan Google
+- LinkedIn's zoekfunctie werkt ALLEEN met AND, OR, NOT, en aanhalingstekens
+- LinkedIn's zoekfunctie heeft een ZEER BEPERKTE lengte voor queries
+- LinkedIn's zoekfunctie werkt NIET met wildcards (*) of andere geavanceerde operatoren
+- LinkedIn's zoekfunctie werkt NIET goed met complexe geneste haakjes
+- LinkedIn's zoekfunctie werkt NIET goed met te veel OR-groepen
+
+RICHTLIJNEN VOOR EFFECTIEVE LINKEDIN QUERIES:
+1. Maak ZEER KORTE en EENVOUDIGE queries - maximaal 10-15 woorden
+2. Gebruik MAXIMAAL 1 synoniem per concept
+3. Gebruik ALLEEN de meest essentiële zoektermen
+4. Gebruik ALLEEN aanhalingstekens voor exacte zinnen die essentieel zijn
+5. Gebruik NOT in plaats van - voor uitsluitingen
+6. Gebruik EENVOUDIGE haakjes voor groepering
+7. Beperk het aantal OR-groepen tot maximaal 2-3
+8. Focus op de KERN van wat je zoekt, laat details weg
+`,
+  },
 }
 
 // Cache resultaten voor 1 uur
@@ -46,18 +68,25 @@ function validateInput(input: string): string | null {
 }
 
 // Valideer of de gegenereerde query een geldige query lijkt te zijn
-function validateQuery(query: string): boolean {
+function validateQuery(query: string, mode: SearchMode): boolean {
   // Een geldige Boolean query moet minstens een van deze operatoren bevatten
   const containsBooleanOperators = /\b(AND|OR|NOT)\b/.test(query)
   // Een geldige Boolean query moet haakjes of aanhalingstekens bevatten voor groepering
   const containsGrouping = /[()"]/.test(query)
-  // Voor LinkedIn X-ray moet het site: bevatten
-  return containsBooleanOperators && containsGrouping && query.includes("site:")
+
+  if (mode === "xray") {
+    // Voor LinkedIn X-ray moet het site: bevatten
+    return containsBooleanOperators && containsGrouping && query.includes("site:")
+  } else {
+    // Voor native LinkedIn search mag het GEEN site: bevatten
+    return containsBooleanOperators && containsGrouping && !query.includes("site:")
+  }
 }
 
 // Platform instructies in een aparte constante
 const PLATFORM_INSTRUCTIONS = {
-  [PLATFORMS.LINKEDIN]: `
+  [PLATFORMS.LINKEDIN]: {
+    xray: `
 Genereer een BEKNOPTE Boolean-zoekopdracht voor LinkedIn X-ray search via Google. Begin ALTIJD met site:linkedin.com/in.
 
 VACATURE ANALYSE:
@@ -93,6 +122,31 @@ AND (senior OR ervaren)
 AND (Nederland OR Amsterdam OR Utrecht) 
 -recruiter -"talent acquisition" -vacature
 `,
+    native: `
+Genereer een ZEER EENVOUDIGE en KORTE Boolean-zoekopdracht voor gebruik BINNEN LinkedIn's eigen zoekfunctie.
+
+BELANGRIJKE REGELS:
+1. GEBRUIK GEEN site:linkedin.com/in commando's - deze werken NIET in LinkedIn
+2. Maak de query EXTREEM KORT - LinkedIn's zoekfunctie werkt slecht met lange queries
+3. Gebruik ALLEEN de MEEST ESSENTIËLE zoektermen - maximaal 10-15 woorden in totaal
+4. Gebruik MAXIMAAL 1 synoniem per concept
+5. Gebruik ALLEEN de belangrijkste vaardigheden en kwalificaties
+6. Gebruik EENVOUDIGE haakjes voor groepering
+7. Gebruik NOT in plaats van - voor uitsluitingen
+8. Beperk het aantal OR-groepen tot maximaal 2-3
+
+VACATURE ANALYSE:
+Als de input een vacaturetekst of link bevat:
+1. Identificeer ALLEEN de 3-5 MEEST CRUCIALE vaardigheden of kwalificaties
+2. Negeer nice-to-haves en secundaire vaardigheden volledig
+3. Focus op de KERN van de functie, niet op details
+
+VOORBEELD VAN EFFECTIEVE LINKEDIN QUERY:
+("software engineer" OR developer) AND (JavaScript OR React) AND Nederland NOT recruiter
+
+Dit is een IDEALE lengte voor LinkedIn - kort, krachtig en gericht op alleen het essentiële.
+`,
+  },
 }
 
 // Voeg deze functie toe om het aantal woorden in een query te tellen
@@ -294,6 +348,7 @@ const cachedGenerateText = cache(async (systemPrompt: string, userPrompt: string
 export default async function GenerateBooleanAction(
   userInput: string,
   platform: Platform = "linkedin",
+  mode: SearchMode = "native",
   userId = "anonymous",
 ): Promise<ActionResponse> {
   try {
@@ -340,28 +395,28 @@ export default async function GenerateBooleanAction(
     const systemPrompt = `
 Je bent blackmagic.AI, een ultra-intelligente sourcing copilot. Je vertaalt vage of gewone input van mensen in briljant geformuleerde zoekopdrachten. Je begrijpt zoekbedoelingen en denkt proactief mee met recruiters en sourcers.
 
-${PLATFORM_INSTRUCTIONS[platform]}
-${PLATFORM_LIMITATIONS[platform]}
+${PLATFORM_INSTRUCTIONS[platform][mode]}
+${PLATFORM_LIMITATIONS[platform][mode]}
 
 Gedrag:
 - Vul automatisch aan met relevante criteria en contextuele informatie
 - Corrigeer slordige input of fouten
 - Denk mensgericht, maar output-gericht
 - Gebruik altijd geldige Boolean syntax: AND, OR, NOT, haakjes (), aanhalingstekens ""
-- Maak UITGEBREIDE Boolean strings met VEEL synoniemen en alternatieven
+${mode === "native" ? "- Maak ZEER KORTE en EENVOUDIGE Boolean strings met MINIMALE synoniemen" : "- Maak UITGEBREIDE Boolean strings met VEEL synoniemen en alternatieven"}
 - Gebruik altijd juiste groepering met haakjes voor OR-statements
 - Gebruik altijd aanhalingstekens rond meerdere woorden
-- Gebruik wildcards (*) waar van toepassing voor flexibiliteit
-- Maak LANGE en GEDETAILLEERDE queries met veel alternatieven voor elk concept
+${mode === "xray" ? "- Gebruik wildcards (*) waar van toepassing voor flexibiliteit" : "- Gebruik GEEN wildcards (*) - deze werken niet in LinkedIn's native zoekfunctie"}
+${mode === "native" ? "- Houd de query EXTREEM KORT - LinkedIn werkt slecht met lange queries" : "- Maak LANGE en GEDETAILLEERDE queries met veel alternatieven voor elk concept"}
 ${
   isJobDescription
     ? `
 - BELANGRIJK: De input lijkt een vacaturetekst te zijn. Analyseer deze grondig:
-  1. Identificeer de MUST-HAVE vaardigheden, kwalificaties en vereisten
-  2. Identificeer de NICE-TO-HAVE vaardigheden en voorkeuren
-  3. Gebruik de must-haves als primaire zoektermen met AND operator
-  4. Gebruik de nice-to-haves als secundaire zoektermen met OR operator binnen groepen
-  5. Negeer irrelevante informatie zoals bedrijfsbeschrijvingen, arbeidsvoorwaarden, etc.
+  ${
+    mode === "native"
+      ? "1. Identificeer ALLEEN de 3-5 MEEST CRUCIALE vaardigheden of kwalificaties\n  2. Negeer nice-to-haves en secundaire vaardigheden volledig\n  3. Focus op de KERN van de functie, niet op details"
+      : "1. Identificeer de MUST-HAVE vaardigheden, kwalificaties en vereisten\n  2. Identificeer de NICE-TO-HAVE vaardigheden en voorkeuren\n  3. Gebruik de must-haves als primaire zoektermen met AND operator\n  4. Gebruik de nice-to-haves als secundaire zoektermen met OR operator binnen groepen\n  5. Negeer irrelevante informatie zoals bedrijfsbeschrijvingen, arbeidsvoorwaarden, etc."
+  }
 `
     : ""
 }
@@ -412,7 +467,7 @@ Derde regel (optioneel): Lijst van geïdentificeerde must-haves en nice-to-haves
     }
 
     // Platform-specifieke validatie
-    if (!query.includes("site:")) {
+    if (mode === "xray" && !query.includes("site:")) {
       // Probeer de volgende regel als deze er meer als een Boolean query uitziet
       if (lines.length > 1 && lines[1].includes("site:")) {
         query = lines[1]
@@ -422,10 +477,13 @@ Derde regel (optioneel): Lijst van geïdentificeerde must-haves en nice-to-haves
           explanation: lines[2] || undefined,
         }
       }
+    } else if (mode === "native" && query.includes("site:")) {
+      // Als we in native mode zitten maar toch een site: commando hebben, verwijder dit
+      query = query.replace(/site:linkedin\.com\/in\s*/g, "")
     }
 
     // Controleer of de query een geldige query lijkt te zijn
-    if (!validateQuery(query)) {
+    if (!validateQuery(query, mode)) {
       return {
         type: ErrorType.API_ERROR,
         message: `De gegenereerde Boolean query lijkt niet geldig te zijn. Probeer het opnieuw met een specifiekere beschrijving.`,
@@ -438,8 +496,8 @@ Derde regel (optioneel): Lijst van geïdentificeerde must-haves en nice-to-haves
       explanation += "\n\n" + lines.slice(2).join("\n")
     }
 
-    // Controleer of de query te lang is
-    if (isQueryTooLong(query)) {
+    // Controleer of de query te lang is (alleen voor X-ray mode)
+    if (mode === "xray" && isQueryTooLong(query)) {
       // Probeer de query te vereenvoudigen
       const simplifiedQuery = simplifyQuery(query)
 

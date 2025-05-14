@@ -6,28 +6,55 @@ import { Code, BookmarkPlus, Bookmark } from "lucide-react"
 import { SavedSearches } from "@/components/saved-searches"
 import { SaveSearchForm } from "@/components/save-search-form"
 import { useSavedSearches } from "@/hooks/use-saved-searches"
+import type { SearchMode } from "@/app/actions"
 
 interface ExampleQueriesProps {
   platform: string
+  searchMode?: SearchMode
   onSelectExample: (query: string) => void
   currentQuery?: string
 }
 
-export function ExampleQueries({ platform, onSelectExample, currentQuery = "" }: ExampleQueriesProps) {
+export function ExampleQueries({
+  platform,
+  searchMode = "native",
+  onSelectExample,
+  currentQuery = "",
+}: ExampleQueriesProps) {
   const [isSaving, setIsSaving] = useState(false)
   const { savedSearches, addSavedSearch, deleteSavedSearch, updateSavedSearch, getCategories } = useSavedSearches()
 
-  // Predefined examples
-  const examples = [
-    {
-      title: "Senior Developer",
-      description: "Senior Java developer met Spring Boot en cloud ervaring",
-    },
-    {
-      title: "UX/UI Designer",
-      description: "UX/UI designer met Figma ervaring en e-commerce achtergrond",
-    },
-  ]
+  // Predefined examples based on search mode
+  const examples =
+    searchMode === "native"
+      ? [
+          {
+            title: "Senior Developer",
+            description: "Senior Java developer met Spring Boot ervaring",
+          },
+          {
+            title: "UX/UI Designer",
+            description: "UX/UI designer met Figma ervaring",
+          },
+          {
+            title: "Accountant SBB",
+            description: "Accountant met ervaring in SBB en Finforward",
+          },
+        ]
+      : [
+          {
+            title: "Senior Developer",
+            description: "Senior Java developer met Spring Boot en cloud ervaring in Amsterdam",
+          },
+          {
+            title: "UX/UI Designer",
+            description: "UX/UI designer met Figma ervaring en e-commerce achtergrond",
+          },
+          {
+            title: "Accountant SBB",
+            description: "Accountant met ervaring in SBB en Finforward in de regio Utrecht",
+          },
+        ]
 
   const handleSaveSearch = (name: string, category: string) => {
     if (currentQuery) {

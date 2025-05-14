@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Copy, Wand2, Linkedin, Search, CheckCircle2 } from "lucide-react"
+import { Copy, Wand2, Linkedin, Search, CheckCircle2, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ExampleQueries } from "@/components/example-queries"
 import { BooleanInfo } from "@/components/boolean-info"
 import { FileUploadTextarea } from "@/components/file-upload-textarea"
-import GenerateBooleanAction, { type Platform } from "@/app/actions"
+import GenerateBooleanAction, { type Platform, type SearchMode } from "@/app/actions"
 import { getSearchUrl } from "@/lib/search-urls"
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
   const [explanation, setExplanation] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [platform, setPlatform] = useState<Platform>("linkedin")
+  const [searchMode, setSearchMode] = useState<SearchMode>("native") // Default to native
   const [isError, setIsError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [copied, setCopied] = useState(false)
@@ -37,7 +38,7 @@ export default function Home() {
     setIsError(false) // Reset de foutmelding tijdens het laden
 
     try {
-      const response = await GenerateBooleanAction(userInput, platform)
+      const response = await GenerateBooleanAction(userInput, platform, searchMode)
 
       if ("type" in response) {
         // Het is een foutrespons
@@ -78,12 +79,20 @@ export default function Home() {
   }
 
   // Genereer zoek-URLs voor het huidige platform
-  const searchUrls = booleanQuery ? getSearchUrl(platform, booleanQuery) : []
+  const searchUrls = booleanQuery ? getSearchUrl(platform, booleanQuery, searchMode) : []
 
   // Handle file or URL upload success
   const handleUploadSuccess = (content: string, source: string) => {
     setUserInput(content)
     setFileName(source)
+  }
+
+  // Toggle search mode
+  const toggleSearchMode = () => {
+    setSearchMode((prev) => (prev === "native" ? "xray" : "native"))
+    // Reset query when changing modes
+    setBooleanQuery("")
+    setExplanation("")
   }
 
   return (
@@ -105,18 +114,50 @@ export default function Home() {
             <Card className="bg-black/40 border border-purple-800/20 p-5 h-full">
               <h2 className="text-lg font-medium mb-4 text-purple-300 flex items-center gap-2">
                 <Linkedin className="h-5 w-5" />
-                LinkedIn X-ray
+                LinkedIn Search
               </h2>
-              <ExampleQueries platform={platform} onSelectExample={handleSelectExample} currentQuery={booleanQuery} />
+              <ExampleQueries
+                platform={platform}
+                searchMode={searchMode}
+                onSelectExample={handleSelectExample}
+                currentQuery={booleanQuery}
+              />
             </Card>
           </div>
 
           <div className="lg:col-span-2 space-y-6">
             <Card className="bg-black/40 border border-purple-800/20 p-5">
-              <h2 className="text-lg font-medium mb-4 text-purple-300 flex items-center gap-2">
-                <Wand2 className="h-5 w-5" />
-                Boolean Generator
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-purple-300 flex items-center gap-2">
+                  <Wand2 className="h-5 w-5" />
+                  Boolean Generator
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleSearchMode}
+                  className={`text-xs border-purple-800/30 hover:bg-purple-900/30 ${
+                    searchMode === "native"
+                      ? "bg-purple-900/20 text-purple-200"
+                      : "bg-transparent text-purple-300 hover:text-purple-200"
+                  }`}
+                >
+                  {searchMode === "native" ? "LinkedIn Search" : "X-ray"}
+                </Button>
+              </div>
+
+              {/* Search mode info */}
+              <div className="mb-4 p-3 bg-purple-900/20 border border-purple-800/30 rounded-md flex items-start gap-3">
+                <Info className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-purple-300">
+                  <p className="font-medium mb-1">{searchMode === "native" ? "LinkedIn Search" : "X-ray"}</p>
+                  <p>
+                    {searchMode === "native"
+                      ? "Genereert korte, eenvoudige Boolean queries voor gebruik binnen LinkedIn's eigen zoekfunctie. Geen site: commando's."
+                      : "Genereert uitgebreide Boolean queries voor Google X-ray search met site:linkedin.com/in commando's."}
+                  </p>
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <div>
